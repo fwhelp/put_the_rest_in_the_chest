@@ -1,0 +1,16 @@
+{
+  "count": 0,
+  "low_stock_threshold": 12,
+  "history": [
+    {
+      "timestamp": "2026-01-01T12:00:00",
+      "action": "init",
+      "amount": 0,
+      "note": "Sample tracker state",
+      "count": 0
+    }
+  ],
+  "support": {
+    "soft_daily_goal": 4
+  }
+}

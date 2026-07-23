@@ -1,0 +1,17 @@
+[Unit]
+Description=Put The Rest In The Chest FastAPI service
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/put-the-rest-in-the-chest
+EnvironmentFile=/opt/put-the-rest-in-the-chest/.env
+ExecStart=/opt/put-the-rest-in-the-chest/.venv/bin/python /opt/put-the-rest-in-the-chest/run_api.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

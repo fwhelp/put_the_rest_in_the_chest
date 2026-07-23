@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="build-number" content="1.5.32">
+  <title>Put The Rest In The Chest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=1.5.33">
+</head>
+<body>
+  <div id="lock-screen" class="lock-screen">
+    <section class="lock-card">
+      <p class="eyebrow">Protected Tracker</p>
+      <h1>Put The Rest In The Chest</h1>
+      <p class="build-stamp" aria-label="Build number">b1.5.33</p>
+      <p class="subtitle">Read-only access can view the tracker and log drinks taken. Any other action that changes counts, thresholds, goals, or stored data requires the edit password.</p>
+      <div class="lock-cameo">
+        <div class="lock-cameo-frame">
+          <img class="lock-cameo-image" src="assets/xena-mascot.jpg" alt="Xena mascot cameo">
+        </div>
+        <p class="lock-cameo-copy">Xena keeps the ledger honest. Little One keeps it lively.</p>
+      </div>
+      <div class="cat-stamp lock-stamp" aria-hidden="true">
+        <img class="cat-stamp-avatar" src="assets/xena-mascot.jpg" alt="">
+        <img class="cat-stamp-avatar" src="assets/little-one-mascot.png" alt="">
+        <span class="cat-stamp-label">Supervisor Cats</span>
+      </div>
+
+      <form id="read-auth-form" class="lock-form">
+        <label>
+          Read-only password
+          <input id="read-password" type="password" inputmode="numeric" autocomplete="current-password" required>
+        </label>
+        <button class="primary-button" type="submit">Unlock Read View</button>
+      </form>
+
+      <p id="auth-message" class="support-note small-support">Enter the read-only password to load the tracker.</p>
+    </section>
+  </div>
+
+  <main id="app-shell" class="app-shell app-shell-locked" hidden>
+    <section class="hero-grid hero-grid-top">
+      <article class="hero-card spotlight">
+        <div class="spotlight-copy">
+          <p class="eyebrow">Current Count</p>
+          <div class="count-line">
+            <strong id="current-count">0</strong>
+            <span>drinks left</span>
+          </div>
+          <p id="stock-status" class="status-copy">Chest is empty. Time for a calm reset and a restock when needed.</p>
+        </div>
+        <div class="stock-meter-wrap">
+          <div class="meter-labels">
+            <span>Stock health</span>
+            <span id="threshold-label">Low alert at 12</span>
+          </div>
+          <div class="stock-meter" aria-hidden="true">
+            <div id="stock-meter-fill" class="stock-meter-fill"></div>
+          </div>
+          <div class="meter-foot">
+            <span id="inventory-value">$0.00 on hand</span>
+            <span id="pace-label">0 drinks in the last 7 days</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="hero-card mascot-card mascot-card-top">
+        <div class="mascot-header">
+          <div>
+            <p class="eyebrow">Drink Tracker</p>
+            <h1>Xena Keeps Watch</h1>
+            <p class="subtitle hero-subtitle">A supportive stock tracker for staying aware, planning ahead, and keeping the pattern gentle without treating heavy days like failure.</p>
+          </div>
+          <p class="build-stamp" aria-label="Build number">b1.5.33</p>
+        </div>
+        <div class="mascot-bubble-wrap">
+          <p class="mascot-bubble-label eyebrow">Xena Says</p>
+          <p id="xena-bubble" class="mascot-bubble">Log the truth, then keep moving.</p>
+        </div>
+        <div class="mascot-frame">
+          <div class="mascot-glow" aria-hidden="true"></div>
+          <img class="mascot-image" src="assets/xena-mascot.jpg" alt="Xena, the tracker mascot, in SNES-style pixel art">
+        </div>
+        <div class="mascot-copy">
+          <p class="eyebrow">Head Mascot</p>
+          <p class="panel-copy">A grumpy, loving tortoiseshell reminder that the point is honest tracking, thoughtful restocking, and getting back on rhythm after messy days.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="priority-grid">
+      <article class="panel quick-actions-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Quick Actions</p>
+            <h2>Update The Tracker</h2>
+          </div>
+          <button id="encouragement-button" class="ghost-button" type="button">New Supportive Note</button>
+        </div>
+        <p id="encouragement-text" class="support-note">Small check-ins count. The goal here is awareness and steadiness, not perfection.</p>
+
+        <div class="read-flow-grid">
+          <form id="take-form" class="action-card">
+            <h3>Log drinks taken</h3>
+            <label>
+              Drinks taken
+              <input id="take-amount" name="amount" type="number" min="1" step="1" value="1" required>
+            </label>
+            <label>
+              Note
+              <input id="take-note" name="note" type="text" maxlength="120" placeholder="Evening check-in">
+            </label>
+            <label class="check-row">
+              <input id="take-last-call" name="last-call" type="checkbox">
+              <span>Mark this as last call for today</span>
+            </label>
+            <label>
+              Last call mood
+              <select id="take-mood">
+                <option value="">No mood yet</option>
+                <option value="1">1 - &#x1F61E; Very rough</option>
+                <option value="2">2 - &#x1F641; Low</option>
+                <option value="3">3 - &#x1F610; Neutral</option>
+                <option value="4">4 - &#x1F642; Good</option>
+                <option value="5">5 - &#x1F604; Great</option>
+              </select>
+            </label>
+            <button class="primary-button warm button-cat" type="submit"><span class="button-cat-icons" aria-hidden="true">&#x1F408;&#x200D;&#x2B1B; &#x1F408;</span><span>Log Drink Count</span></button>
+          </form>
+          <section id="mood-editor-card" class="history-editor-card mood-editor-card integrated-mood-card">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Daily Mood</p>
+                <h3>Mood Check-In</h3>
+              </div>
+              <p class="panel-meta">1 to 5 for the day, with optional last-call flag</p>
+            </div>
+            <p class="panel-copy">Save a daily mood anytime, with or without a linked drink. If a later drink becomes the real last call, mark that mood entry as last call and the earlier same-day last-call flag will clear automatically.</p>
+            <form id="mood-editor-form" class="history-editor-form">
+              <input id="mood-entry-id" type="hidden">
+              <label>
+                Date and time
+                <input id="mood-timestamp" type="datetime-local" required>
+              </label>
+              <label>
+                Mood
+                <select id="mood-value">
+                  <option value="">No mood yet</option>
+                  <option value="1">1 - &#x1F61E; Very rough</option>
+                  <option value="2">2 - &#x1F641; Low</option>
+                  <option value="3">3 - &#x1F610; Neutral</option>
+                  <option value="4">4 - &#x1F642; Good</option>
+                  <option value="5">5 - &#x1F604; Great</option>
+                </select>
+              </label>
+              <label class="check-row">
+                <input id="mood-last-call" type="checkbox">
+                <span>This entry was last call</span>
+              </label>
+              <label class="history-editor-wide">
+                Note
+                <input id="mood-note" type="text" maxlength="120" placeholder="Mood context or end-of-night note">
+              </label>
+              <div class="history-editor-actions history-editor-wide">
+                <button id="mood-save-button" class="secondary-button" type="submit">Save Mood Check-In</button>
+              </div>
+              <p id="mood-save-status" class="mood-save-status history-editor-wide" aria-live="polite"></p>
+            </form>
+          </section>
+        </div>
+      </article>
+    </section>
+
+      <section class="mini-stats-grid">
+      <article class="hero-card mini-stats">
+        <div class="mini-stat">
+          <p class="eyebrow">7-Day Average</p>
+          <strong id="seven-day-average">0.0</strong>
+          <span>drinks per day</span>
+        </div>
+        <div class="mini-stat">
+          <p class="eyebrow">Tracked Value</p>
+          <strong id="consumed-value">$0.00</strong>
+          <span>consumed this month</span>
+        </div>
+        <div class="mini-stat">
+          <p class="eyebrow">Tracking Streak</p>
+          <strong id="tracking-streak">0</strong>
+          <span>days with check-ins</span>
+        </div>
+        <div class="mini-stat">
+          <p class="eyebrow">Steady Days</p>
+          <strong id="steady-days">0</strong>
+          <span>logged days in the last 14</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <section class="main-column">
+        <article class="panel quick-actions-panel" hidden aria-hidden="true">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Quick Actions</p>
+              <h2>Update The Tracker</h2>
+            </div>
+            <button id="legacy-encouragement-button" class="ghost-button" type="button">New Supportive Note</button>
+          </div>
+          <p id="legacy-encouragement-text" class="support-note">Small check-ins count. The goal here is awareness and steadiness, not perfection.</p>
+
+          <div class="actions-grid">
+            <form id="legacy-add-form" class="action-card">
+              <h3>Add stock</h3>
+              <label>
+                Drinks added
+                <input id="legacy-add-amount" name="amount" type="number" min="1" step="1" value="24" required>
+              </label>
+              <label>
+                Note
+                <input id="legacy-add-note" name="note" type="text" maxlength="120" placeholder="Restocked from Costco">
+              </label>
+              <button class="primary-button" type="submit">Add To Chest</button>
+            </form>
+
+            <form id="legacy-take-form" class="action-card">
+              <h3>Log drinks taken</h3>
+              <label>
+                Drinks taken
+                <input id="legacy-take-amount" name="amount" type="number" min="1" step="1" value="1" required>
+              </label>
+              <label>
+                Note
+                <input id="legacy-take-note" name="note" type="text" maxlength="120" placeholder="Evening check-in">
+              </label>
+              <label class="check-row">
+                <input id="legacy-take-last-call" name="last-call" type="checkbox">
+                <span>Mark this as last call for today</span>
+              </label>
+              <label>
+                Last call mood
+                <select id="legacy-take-mood">
+                  <option value="">No mood yet</option>
+                  <option value="1">1 - 😞 Very rough</option>
+                  <option value="2">2 - 🙁 Low</option>
+                  <option value="3">3 - 😐 Neutral</option>
+                  <option value="4">4 - 🙂 Good</option>
+                  <option value="5">5 - 😄 Great</option>
+                </select>
+              </label>
+              <button class="primary-button warm" type="submit">Log Drink Count</button>
+            </form>
+
+            <form id="legacy-threshold-form" class="action-card compact-card">
+              <h3>Low-stock alert</h3>
+              <label>
+                Threshold
+                <input id="legacy-threshold-input" name="threshold" type="number" min="0" step="1" value="12" required>
+              </label>
+              <button class="secondary-button" type="submit">Save Threshold</button>
+            </form>
+
+            <form id="legacy-count-form" class="action-card compact-card">
+              <h3>Manual correction</h3>
+              <label>
+                Set current count
+                <input id="legacy-count-input" name="count" type="number" min="0" step="1" value="0" required>
+              </label>
+              <label>
+                Note
+                <input id="legacy-count-note" name="note" type="text" maxlength="120" placeholder="Manual correction">
+              </label>
+              <div class="inline-actions">
+                <button class="secondary-button" type="submit">Update Count</button>
+                <button id="legacy-reset-count-button" class="danger-button" type="button">Reset To 0</button>
+              </div>
+            </form>
+          </div>
+        </article>
+
+        <article class="panel mood-panel" hidden aria-hidden="true">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Last Call Mood</p>
+              <h2>Mood Check-In</h2>
+            </div>
+            <p class="panel-meta">1 to 5 at the final drink check-in</p>
+          </div>
+          <section id="legacy-mood-editor-card" class="history-editor-card mood-editor-card">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Mood Corrections</p>
+                <h3>Update A Last Call Check-In</h3>
+              </div>
+            </div>
+            <p class="panel-copy">Use this to mark the end-of-day check-in, rate mood from 1 to 5, and update last-call notes later if needed. Read or edit access can adjust these mood details.</p>
+            <form id="legacy-mood-editor-form" class="history-editor-form">
+              <input id="legacy-mood-entry-id" type="hidden">
+              <label>
+                Date and time
+                <input id="legacy-mood-timestamp" type="datetime-local" required>
+              </label>
+              <label>
+                Mood
+                <select id="legacy-mood-value">
+                  <option value="">No mood yet</option>
+                  <option value="1">1 - 😞 Very rough</option>
+                  <option value="2">2 - 🙁 Low</option>
+                  <option value="3">3 - 😐 Neutral</option>
+                  <option value="4">4 - 🙂 Good</option>
+                  <option value="5">5 - 😄 Great</option>
+                </select>
+              </label>
+              <label class="check-row">
+                <input id="legacy-mood-last-call" type="checkbox">
+                <span>This entry was last call</span>
+              </label>
+              <label class="history-editor-wide">
+                Note
+                <input id="legacy-mood-note" type="text" maxlength="120" placeholder="Mood context or end-of-night note">
+              </label>
+              <div class="history-editor-actions history-editor-wide">
+                <button id="legacy-mood-save-button" class="secondary-button" type="submit">Save Mood Check-In</button>
+              </div>
+            </form>
+          </section>
+        </article>
+
+        <article class="panel trend-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Trends</p>
+              <h2>Recent Drink Pattern</h2>
+            </div>
+            <p id="chart-caption" class="panel-meta">Last 14 days</p>
+          </div>
+          <div class="panel-cameo">
+            <div class="panel-cameo-avatars" aria-hidden="true">
+              <img class="panel-cameo-avatar panel-cameo-avatar-xena" src="assets/xena-mascot.jpg" alt="">
+              <img class="panel-cameo-avatar panel-cameo-avatar-little" src="assets/little-one-mascot.png" alt="">
+            </div>
+            <p class="panel-cameo-copy">Xena watches the count. Little One notices the wiggles in the pattern.</p>
+          </div>
+          <div class="trend-chart-wrap">
+            <div id="trend-chart" class="trend-chart" aria-label="Recent drinks chart"></div>
+          </div>
+        </article>
+
+        <article class="panel mood-panel mood-trends-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Mood Trends</p>
+              <h2>Recent Mood Pattern</h2>
+            </div>
+            <p id="mood-caption" class="panel-meta">Last-call check-ins and mood drift</p>
+          </div>
+          <div class="panel-cameo">
+            <div class="panel-cameo-avatars" aria-hidden="true">
+              <img class="panel-cameo-avatar panel-cameo-avatar-little" src="assets/little-one-mascot.png" alt="">
+              <img class="panel-cameo-avatar panel-cameo-avatar-xena" src="assets/xena-mascot.jpg" alt="">
+            </div>
+            <p class="panel-cameo-copy">Feelings count too. Little One blurts them out and Xena writes them down.</p>
+          </div>
+          <div class="mood-summary-grid">
+            <section class="summary-card">
+              <h3>Recent Mood</h3>
+              <dl>
+                <div><dt>14-day average</dt><dd id="mood-average">—</dd></div>
+                <div><dt>Latest check-in</dt><dd id="mood-last">—</dd></div>
+                <div><dt>Last-call logs</dt><dd id="mood-count">0</dd></div>
+              </dl>
+            </section>
+            <section class="summary-card mood-duo-card">
+              <p class="eyebrow">Cat Commentary</p>
+              <p id="mood-xena-line" class="duo-line"><span class="duo-name">Xena:</span> Mood belongs in the log too, not just the count.</p>
+              <p id="mood-little-one-line" class="duo-line"><span class="duo-name">Little One:</span> Feelings are data if you write them down before they dissolve.</p>
+            </section>
+          </div>
+        </article>
+
+        <div id="mobile-hero-slot" class="mobile-panel-slot mobile-panel-slot-hero" aria-hidden="true"></div>
+        <div id="mobile-stats-slot" class="mobile-panel-slot mobile-panel-slot-stats" aria-hidden="true"></div>
+
+        <article class="panel summaries-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Summaries</p>
+              <h2>Money, Nutrition, And Pace</h2>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <section class="summary-card">
+              <h3>Last 7 Days</h3>
+              <dl>
+                <div><dt>Drinks</dt><dd id="week-drinks">0</dd></div>
+                <div><dt>Avg / day</dt><dd id="week-average">0.0</dd></div>
+                <div><dt>Value consumed</dt><dd id="week-value">$0.00</dd></div>
+                <div><dt>Calories</dt><dd id="week-calories">0</dd></div>
+              </dl>
+            </section>
+            <section class="summary-card">
+              <h3>Last 30 Days</h3>
+              <dl>
+                <div><dt>Drinks</dt><dd id="month-drinks">0</dd></div>
+                <div><dt>Spent on stock</dt><dd id="month-spent">$0.00</dd></div>
+                <div><dt>Sodium</dt><dd id="month-sodium">0 mg</dd></div>
+                <div><dt>Carbs</dt><dd id="month-carbs">0 g</dd></div>
+              </dl>
+            </section>
+            <section class="summary-card">
+              <h3>Lifetime</h3>
+              <dl>
+                <div><dt>Drinks logged</dt><dd id="lifetime-drinks">0</dd></div>
+                <div><dt>Total spent</dt><dd id="lifetime-spent">$0.00</dd></div>
+                <div><dt>Total value consumed</dt><dd id="lifetime-value">$0.00</dd></div>
+                <div><dt>Tracked days</dt><dd id="tracked-days">0</dd></div>
+              </dl>
+            </section>
+          </div>
+        </article>
+
+        <article class="panel history-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">History</p>
+              <h2>Recent Activity</h2>
+            </div>
+            <div class="history-tools">
+              <label class="history-limit">
+                Show
+                <select id="history-limit">
+                  <option value="10">10</option>
+                  <option value="25" selected>25</option>
+                  <option value="50">50</option>
+                </select>
+              </label>
+              <button id="export-button" class="ghost-button" type="button">Export JSON</button>
+              <label class="import-button ghost-button">
+                Import JSON
+                <input id="import-input" type="file" accept="application/json" hidden>
+              </label>
+            </div>
+          </div>
+          <div class="cat-stamp history-stamp" aria-hidden="true">
+            <img class="cat-stamp-avatar" src="assets/xena-mascot.jpg" alt="">
+            <span class="cat-stamp-label">Xena-signed receipts</span>
+          </div>
+          <div class="panel-cameo panel-cameo-solo">
+            <div class="panel-cameo-avatars" aria-hidden="true">
+              <img class="panel-cameo-avatar panel-cameo-avatar-xena" src="assets/xena-mascot.jpg" alt="">
+            </div>
+            <p class="panel-cameo-copy">Xena likes the receipts. The more honest the log, the less guesswork later.</p>
+          </div>
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Action</th>
+                  <th>Amount</th>
+                  <th>Count</th>
+                  <th>Note</th>
+                  <th>Edit</th>
+                </tr>
+              </thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+
+          <section id="history-editor-card" class="history-editor-card">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Historical Corrections</p>
+                <h3>Edit Or Add Past Entries</h3>
+              </div>
+            </div>
+            <p class="panel-copy">Use edit mode to add a late check-in, adjust a missed count, or correct an older entry without losing the full timeline.</p>
+            <form id="history-editor-form" class="history-editor-form">
+              <input id="history-entry-id" type="hidden">
+              <label>
+                Date and time
+                <input id="history-timestamp" type="datetime-local" required>
+              </label>
+              <label>
+                Action
+                <select id="history-action" required>
+                  <option value="add">Add stock</option>
+                  <option value="take">Drinks taken</option>
+                  <option value="daily_tally">Daily drink tally</option>
+                  <option value="set_count">Manual count correction</option>
+                  <option value="set_threshold">Low-stock threshold change</option>
+                  <option value="note">Note only</option>
+                  <option value="reset_count">Reset count to zero</option>
+                </select>
+              </label>
+              <label>
+                Amount
+                <input id="history-amount" type="number" min="0" step="1" value="1" required>
+              </label>
+              <label class="history-editor-wide">
+                Note
+                <input id="history-note" type="text" maxlength="120" placeholder="Late-night correction or detail">
+              </label>
+              <div class="history-editor-actions history-editor-wide">
+                <button id="history-save-button" class="secondary-button" type="submit">Save Historical Entry</button>
+                <button id="history-new-button" class="ghost-button" type="button">New Blank Entry</button>
+                <button id="history-delete-button" class="danger-button" type="button">Delete Selected Entry</button>
+              </div>
+            </form>
+          </section>
+        </article>
+
+        <article class="panel mood-events-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Mood Log</p>
+              <h2>Mood Events</h2>
+            </div>
+            <div class="history-tools">
+              <label class="history-limit">
+                Show
+                <select id="mood-limit">
+                  <option value="10">10</option>
+                  <option value="25" selected>25</option>
+                  <option value="50">50</option>
+                  <option value="9999">All</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="panel-cameo panel-cameo-solo">
+            <div class="panel-cameo-avatars" aria-hidden="true">
+              <img class="panel-cameo-avatar panel-cameo-avatar-little" src="assets/little-one-mascot.png" alt="">
+            </div>
+            <p class="panel-cameo-copy">Little One says the mood log is for catching the weird little shifts before they disappear.</p>
+          </div>
+          <p class="panel-copy">Daily mood entries, last-call tags, and linked notes live here for review and editing.</p>
+          <div class="history-table-wrap mood-table-wrap">
+            <table class="history-table mood-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Mood</th>
+                  <th>Last Call</th>
+                  <th>Note</th>
+                  <th>Linked Drink</th>
+                  <th>Edit</th>
+                </tr>
+              </thead>
+              <tbody id="mood-body"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <aside class="side-column">
+        <article class="panel wins-panel">
+          <p class="eyebrow">Milestones</p>
+          <h2>Collected Wins</h2>
+          <div class="wins-summary">
+            <div class="wins-summary-stat">
+              <p class="eyebrow">Unlocked</p>
+              <strong id="badge-count">0</strong>
+              <span id="badge-count-copy">quiet little wins so far</span>
+            </div>
+            <div class="wins-summary-highlight">
+              <p class="eyebrow">Latest Win</p>
+              <strong id="badge-highlight-name">No wins yet</strong>
+              <p id="badge-highlight-text" class="panel-copy">Wins appear here as the log grows. Nothing to chase, just small signs of consistency.</p>
+            </div>
+          </div>
+          <p id="badge-cat-line" class="support-note small-support">Xena says consistency counts. Little One says tiny wins still deserve witness protection.</p>
+          <div id="badge-list" class="badge-list"></div>
+        </article>
+
+        <article class="panel companion-panel">
+          <p class="eyebrow">Companion Deck</p>
+          <h2>Xena And Little One</h2>
+          <p class="panel-copy">Xena runs the clipboard like a tough older sister. Little One is the quick, goofy chaos goblin who somehow still notices things that matter.</p>
+          <div class="companion-list">
+            <article class="companion-card companion-card-primary">
+              <div class="companion-portrait">
+                <img src="assets/xena-mascot.jpg" alt="Xena mascot portrait">
+              </div>
+              <div>
+                <strong>Xena</strong>
+                <p class="panel-copy">Lead mascot. Tough-love energy, sharp eyes, and a permanent opinion about keeping the count straight.</p>
+              </div>
+            </article>
+            <article class="companion-card companion-card-secondary">
+              <div class="companion-portrait">
+                <img src="assets/little-one-mascot.png" alt="Little One mascot portrait">
+              </div>
+              <div>
+                <strong>Little One</strong>
+                <p class="panel-copy">Equal sidekick and family gremlin. Fast paws, silly timing, and the kind of unexpected brainwave that shows up mid-chaos.</p>
+              </div>
+            </article>
+          </div>
+          <div class="little-one-bubble-wrap">
+            <p class="mascot-bubble-label eyebrow">Little One Says</p>
+            <p id="little-one-bubble" class="mascot-bubble little-one-bubble">Silly is not the same thing as careless. We can log it and keep going.</p>
+          </div>
+          <div class="duo-dialogue">
+            <p id="duo-xena-line" class="duo-line"><span class="duo-name">Xena:</span> “Count it right the first time, baby cat.”</p>
+            <p id="duo-little-one-line" class="duo-line"><span class="duo-name">Little One:</span> “I got distracted, but I still remembered the drink log... mostly.”</p>
+          </div>
+        </article>
+
+        <article class="panel facts-panel">
+          <p class="eyebrow">Product Facts</p>
+          <h2>Case Math</h2>
+          <dl class="facts-list">
+            <div><dt>Case size</dt><dd id="pack-count">24 drinks</dd></div>
+            <div><dt>Case price</dt><dd id="pack-price">$0.00</dd></div>
+            <div><dt>Per drink</dt><dd id="unit-price">$0.00</dd></div>
+            <div><dt>Calories</dt><dd>100 each</dd></div>
+          </dl>
+        </article>
+
+        <article class="panel notes-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Session Notes</p>
+              <h2>Latest Readout</h2>
+            </div>
+          </div>
+          <div id="toast-log" class="toast-log"></div>
+        </article>
+
+        <article class="panel access-panel">
+          <p class="eyebrow">Access</p>
+          <h2>Protection</h2>
+          <p id="access-readout" class="panel-copy">Read-only mode locked.</p>
+          <form id="edit-auth-form" class="stack-form">
+            <label>
+              Edit password
+              <input id="edit-password" type="password" inputmode="numeric" autocomplete="current-password">
+            </label>
+            <button id="edit-unlock-button" class="secondary-button" type="submit">Unlock Editing</button>
+          </form>
+          <button id="logout-button" class="ghost-button full-width" type="button">Lock Tracker</button>
+        </article>
+
+        <article class="panel admin-panel">
+          <p class="eyebrow">Edit Controls</p>
+          <h2>Stock And Corrections</h2>
+          <p class="panel-copy">These controls are for restocks, whole-day tallies, threshold changes, and cleanup after missed entries.</p>
+          <div class="admin-grid">
+            <form id="add-form" class="action-card">
+              <h3>Add stock</h3>
+              <label>
+                Drinks added
+                <input id="add-amount" name="amount" type="number" min="1" step="1" value="24" required>
+              </label>
+              <label>
+                Note
+                <input id="add-note" name="note" type="text" maxlength="120" placeholder="Restocked from Costco">
+              </label>
+              <button class="primary-button" type="submit">Add To Chest</button>
+            </form>
+
+            <form id="threshold-form" class="action-card compact-card">
+              <h3>Low-stock alert</h3>
+              <label>
+                Threshold
+                <input id="threshold-input" name="threshold" type="number" min="0" step="1" value="12" required>
+              </label>
+              <button class="secondary-button" type="submit">Save Threshold</button>
+            </form>
+
+            <form id="count-form" class="action-card compact-card">
+              <h3>Manual correction</h3>
+              <label>
+                Set current count
+                <input id="count-input" name="count" type="number" min="0" step="1" value="0" required>
+              </label>
+              <label>
+                Note
+                <input id="count-note" name="note" type="text" maxlength="120" placeholder="Manual correction">
+              </label>
+              <div class="inline-actions">
+                <button class="secondary-button" type="submit">Update Count</button>
+                <button id="reset-count-button" class="danger-button" type="button">Reset To 0</button>
+              </div>
+            </form>
+
+            <form id="tally-form" class="action-card compact-card">
+              <h3>Daily drink tally</h3>
+              <label>
+                Date and time
+                <input id="tally-timestamp" name="timestamp" type="datetime-local" required>
+              </label>
+              <label>
+                Total drinks that day
+                <input id="tally-amount" name="amount" type="number" min="1" step="1" value="4" required>
+              </label>
+              <label>
+                Note
+                <input id="tally-note" name="note" type="text" maxlength="120" placeholder="Whole-day tally entered later">
+              </label>
+              <button class="secondary-button" type="submit">Save Daily Tally</button>
+            </form>
+          </div>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <template id="badge-template">
+    <article class="badge-card">
+      <strong class="badge-name"></strong>
+      <p class="badge-text"></p>
+    </article>
+  </template>
+
+  <script src="script.js?v=1.5.33"></script>
+</body>
+</html>
